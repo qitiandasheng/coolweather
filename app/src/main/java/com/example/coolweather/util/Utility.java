@@ -5,11 +5,12 @@ import android.text.TextUtils;
 import com.example.coolweather.db.City;
 import com.example.coolweather.db.County;
 import com.example.coolweather.db.Province;
+import com.example.coolweather.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.litepal.crud.DataSupport;
 
 /**
  * Created by root on 6/23/17.
@@ -56,6 +57,7 @@ public class Utility {
     }
 
     public static boolean handleCountyResponse(String response, int cityId){
+        //System.out.println("county response: "+response);
         if(!TextUtils.isEmpty(response)){
             try{
                 JSONArray counties = new JSONArray(response);
@@ -65,6 +67,7 @@ public class Utility {
                     county.setCountyName(countyObj.getString("name"));
                     county.setWeatherId(countyObj.getString("weather_id"));
                     county.setCityId(cityId);
+                    county.save();
                 }
                 return true;
             }catch(JSONException e){
@@ -72,5 +75,17 @@ public class Utility {
             }
         }
         return false;
+    }
+
+    public static Weather handleWeatherResponse(String response){
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherContent, Weather.class);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }
